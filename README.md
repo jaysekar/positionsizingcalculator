@@ -42,6 +42,7 @@ This calculator follows proper risk management principles:
 ## Running this locally (copy and paste this below)
 <code>
 git clone https://github.com/jaysekar/positionsizingcalculator.git
+cd positionsizingcalculator
 docker-compose up --build
 </code>
 
