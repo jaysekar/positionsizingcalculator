@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Position Size Calculator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e9f2 100%);
+        }
+
+        .card {
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+        }
+
+        .input-field {
+            transition: all 0.3s ease;
+            border: 1px solid #e2e8f0;
+        }
+
+        .input-field:focus {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .calculate-btn {
+            background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%);
+            transition: all 0.3s ease;
+        }
+
+        .calculate-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .results-container {
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result-row {
+            transition: all 0.3s ease;
+        }
+
+        .result-row:hover {
+            background-color: #f8fafc;
+        }
+    </style>
+</head>
+<body class="min-h-screen p-4 md:p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl md:text-4xl font-bold text-center mb-8 text-gray-800">
+            Position Size Calculator
+        </h1>
+        
+        <div class="card rounded-2xl p-6 md:p-8">
+            <form id="calculatorForm" class="space-y-6">
+                <!-- Symbol Input -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Stock Symbol</label>
+                    <input type="text" id="symbol" required 
+                           class="input-field w-full px-4 py-3 rounded-lg text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                           placeholder="e.g., AAPL">
+                </div>
+
+                <!-- Entry Price -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Entry Price</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <span class="text-gray-500">$</span>
+                        </div>
+                        <input type="number" 
+                               step="0.01" 
+                               id="entryPrice" 
+                               required 
+                               class="input-field w-full pl-7 py-3 rounded-lg text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                               placeholder="0.00">
+                    </div>
+                </div>
+
+                <!-- Stop Loss Section -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Potential Stop Loss Exit Price</label>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <span class="text-gray-500">$</span>
+                            </div>
+                            <input type="number" 
+                                   step="0.01" 
+                                   id="exitPrice" 
+                                   class="input-field w-full pl-7 py-3 rounded-lg text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                   placeholder="0.00">
+                        </div>
+                        <div class="relative">
+                            <input type="number" 
+                                   step="0.1" 
+                                   id="stopLossPercentage" 
+                                   class="input-field w-full pl-3 pr-8 py-3 rounded-lg text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                   placeholder="0.00">
+                            <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                <span class="text-gray-500">%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Calculate By Section -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Calculate by</label>
+                    <select id="calcType" 
+                            class="input-field w-full px-4 py-3 rounded-lg text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="1">Portfolio Risk %</option>
+                        <option value="2">Fixed Dollar Amount</option>
+                    </select>
+                </div>
+
+                <!-- Portfolio Risk Inputs -->
+                <div id="portfolioInputs" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Portfolio Size</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <span class="text-gray-500">$</span>
+                            </div>
+                            <input type="number" 
+                                   step="0.01" 
+                                   id="portfolioSize" 
+                                   class="input-field w-full pl-7 py-3 rounded-lg text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                   placeholder="0.00">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Risk Percentage</label>
+                        <div class="relative">
+                            <input type="number" 
+                                   step="0.1" 
+                                   id="riskPercentage" 
+                                   class="input-field w-full pl-3 pr-8 py-3 rounded-lg text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                   placeholder="0.00">
+                            <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                <span class="text-gray-500">%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fixed Dollar Amount Input -->
+                <div id="dollarInputs" class="hidden">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Dollar Amount</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <span class="text-gray-500">$</span>
+                        </div>
+                        <input type="number" 
+                               step="0.01" 
+                               id="dollarAmount" 
+                               class="input-field w-full pl-7 py-3 rounded-lg text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                               placeholder="0.00">
+                    </div>
+                </div>
+
+                <!-- Calculate Button -->
+                <button type="submit" class="calculate-btn w-full py-3 px-6 rounded-lg text-white font-semibold text-lg focus:outline-none">
+                    Calculate Position Size
+                </button>
+            </form>
+
+            <!-- Results Section -->
+            <div id="results" class="hidden mt-8 results-container">
+                <h2 class="text-2xl font-bold mb-6 text-gray-800 border-b pb-4">Position Sizing Results</h2>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="result-row p-4 rounded-lg bg-gray-50">
+                        <p class="text-sm text-gray-500">Symbol</p>
+                        <p class="text-lg font-semibold text-gray-800" id="resultSymbol"></p>
+                    </div>
+                    <div class="result-row p-4 rounded-lg bg-gray-50">
+                        <p class="text-sm text-gray-500">Entry Price</p>
+                        <p class="text-lg font-semibold text-gray-800">$<span id="resultEntryPrice"></span></p>
+                    </div>
+                    <div class="result-row p-4 rounded-lg bg-gray-50">
+                        <p class="text-sm text-gray-500">Stop Loss</p>
+                        <p class="text-lg font-semibold text-gray-800">$<span id="resultStopLoss"></span></p>
+                    </div>
+                    <div class="result-row p-4 rounded-lg bg-gray-50">
+                        <p class="text-sm text-gray-500">Risk per Share</p>
+                        <p class="text-lg font-semibold text-gray-800">$<span id="resultRiskPerShare"></span></p>
+                    </div>
+                    <div class="result-row p-4 rounded-lg bg-gray-50">
+                        <p class="text-sm text-gray-500">Number of Shares</p>
+                        <p class="text-lg font-semibold text-gray-800" id="resultShares"></p>
+                    </div>
+                    <div class="result-row p-4 rounded-lg bg-gray-50">
+                        <p class="text-sm text-gray-500">Total Position Cost</p>
+                        <p class="text-lg font-semibold text-gray-800">$<span id="resultTotalCost"></span></p>
+                    </div>
+                    <div class="result-row p-4 rounded-lg bg-gray-50">
+                        <p class="text-sm text-gray-500">Total Risk Amount</p>
+                        <p class="text-lg font-semibold text-gray-800">$<span id="resultRiskAmount"></span></p>
+                    </div>
+                    <div class="result-row p-4 rounded-lg bg-gray-50">
+                        <p class="text-sm text-gray-500">Risk Percentage</p>
+                        <p class="text-lg font-semibold text-gray-800"><span id="resultRiskPercentage"></span>%</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Previous JavaScript code remains the same
+        const form = document.getElementById('calculatorForm');
+        const calcType = document.getElementById('calcType');
+        const portfolioInputs = document.getElementById('portfolioInputs');
+        const dollarInputs = document.getElementById('dollarInputs');
+        const results = document.getElementById('results');
+        const exitPriceInput = document.getElementById('exitPrice');
+        const stopLossPercentageInput = document.getElementById('stopLossPercentage');
+        const entryPriceInput = document.getElementById('entryPrice');
+
+        // Calculate percentage when dollar amount changes
+        exitPriceInput.addEventListener('input', () => {
+            const entryPrice = parseFloat(entryPriceInput.value);
+            const exitPrice = parseFloat(exitPriceInput.value);
+            
+            if (!isNaN(entryPrice) && !isNaN(exitPrice) && entryPrice !== 0) {
+                const percentage = ((entryPrice - exitPrice) / entryPrice) * 100;
+                stopLossPercentageInput.value = percentage.toFixed(2);
+            }
+        });
+
+        // Calculate dollar amount when percentage changes
+        stopLossPercentageInput.addEventListener('input', () => {
+            const entryPrice = parseFloat(entryPriceInput.value);
+            const percentage = parseFloat(stopLossPercentageInput.value);
+            
+            if (!isNaN(entryPrice) && !isNaN(percentage)) {
+                const exitPrice = entryPrice * (1 - percentage / 100);
+                exitPriceInput.value = exitPrice.toFixed(2);
+            }
+        });
+
+        // Update calculations when entry price changes
+        entryPriceInput.addEventListener('input', () => {
+            const percentage = parseFloat(stopLossPercentageInput.value);
+            const entryPrice = parseFloat(entryPriceInput.value);
+            
+            if (!isNaN(entryPrice) && !isNaN(percentage)) {
+                const exitPrice = entryPrice * (1 - percentage / 100);
+                exitPriceInput.value = exitPrice.toFixed(2);
+            }
+        });
+
+        // Handle form submission
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const data = {
+                symbol: document.getElementById('symbol').value,
+                entryPrice: entryPriceInput.value,
+                exitPrice: exitPriceInput.value,
+                calcType: calcType.value,
+                portfolioSize: document.getElementById('portfolioSize').value,
+                riskPercentage: document.getElementById('riskPercentage').value,
+                dollarAmount: document.getElementById('dollarAmount').value
+            };
+
+            try {
+                const response = await fetch('/calculate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+                
+                if (response.ok) {
+                    results.classList.remove('hidden');
+                    document.getElementById('resultSymbol').textContent = result.symbol;
+                    document.getElementById('resultEntryPrice').textContent = result.entryPrice;
+                    document.getElementById('resultStopLoss').textContent = result.stopLoss;
+                    document.getElementById('resultRiskPerShare').textContent = result.riskPerShare;
+                    document.getElementById('resultShares').textContent = result.shares;
+                    document.getElementById('resultTotalCost').textContent = result.totalCost;
+                    document.getElementById('resultRiskAmount').textContent = result.riskAmount;
+                    document.getElementById('resultRiskPercentage').textContent = result.riskPercentage;
+                    
+                    results.scrollIntoView({ behavior: 'smooth' });
+                } else {
+                    alert(result.error);
+                }
+            } catch (error) {
+                alert('An error occurred while calculating the position size.');
+            }
+        });
+
+        // Handle calculation type change
+        calcType.addEventListener('change', () => {
+            if (calcType.value === '1') {
+                portfolioInputs.classList.remove('hidden');
+                dollarInputs.classList.add('hidden');
+            } else {
+                portfolioInputs.classList.add('hidden');
+                dollarInputs.classList.remove('hidden');
+            }
+        });
+    </script>
+</body>
+</html>

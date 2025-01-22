@@ -1,0 +1,11 @@
+services:
+  web:
+    build: .
+    ports:
+      - "5000:5000"
+    volumes:
+      - .:/position_calculator
+    working_dir: /position_calculator
+    environment:
+      - FLASK_APP=app
+      - FLASK_ENV=production
