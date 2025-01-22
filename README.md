@@ -45,6 +45,7 @@ git clone https://github.com/jaysekar/positionsizingcalculator.git
 cd positionsizingcalculator
 docker-compose up --build
 </code>
+At this point, the UI should be hosted on your web server on http://127.0.0.1:5000. Enjoy! 
 
 ## License
 MIT License - feel free to use and modify
