@@ -40,8 +40,11 @@ This calculator follows proper risk management principles:
 - Bootstrap
 
 ## Running this locally (copy and paste this below)
-- git clone https://github.com/jaysekar/positionsizingcalculator.git
-- docker-compose up --build
+<code>
+git clone https://github.com/jaysekar/positionsizingcalculator.git
+docker-compose up --build
+</code>
+
 ## License
 MIT License - feel free to use and modify
 
